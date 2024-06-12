@@ -6,9 +6,11 @@ import CustomButton from "@/components/CustomButton";
 import FormField from "@/components/FormField";
 import { Link, router } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
+import useUserStore from "@/stores/userStore";
 import { createUser } from "../../lib/appwrite";
 
 const SignUp = () => {
+  const { setUser, setIsLogged } = useUserStore();
   const [form, setForm] = useState({
     username: "",
     email: "",
@@ -18,6 +20,8 @@ const SignUp = () => {
   const { mutate: handleSignUp, isPending: isSubmitting } = useMutation({
     mutationFn: createUser,
     onSuccess: (data) => {
+      setUser(data);
+      setIsLogged(true);
       router.replace("/home");
     },
 
@@ -72,6 +76,7 @@ const SignUp = () => {
           <CustomButton
             title="Sign Up"
             handlePress={submit}
+            isLoading={isSubmitting}
             containerStyles="mt-7"
           />
           <View className="justify-center pt-5 flex-row gap-2">
@@ -85,7 +90,6 @@ const SignUp = () => {
                 color: "#FF9C01",
                 fontFamily: "Poppins-SemiBold, sans-serif",
               }}
-              // className="text-lg font-psemibold text-secondary"
             >
               Sign In
             </Link>

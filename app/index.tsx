@@ -2,11 +2,14 @@ import { Text, View, ScrollView, Image } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React from "react";
+import useGetUser from "@/hooks/useGetUser";
 import { images } from "@/constants";
 import { Redirect, router } from "expo-router";
 import CustomButton from "@/components/CustomButton";
 
 const index = () => {
+  const { user } = useGetUser();
+  if (user) return <Redirect href={"/home"} />;
   return (
     <SafeAreaView style={{ height: "100%", backgroundColor: "#161622" }}>
       <ScrollView contentContainerStyle={{ height: "100%" }}>

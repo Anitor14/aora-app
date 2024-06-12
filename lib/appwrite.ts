@@ -4,8 +4,10 @@ import {
   ID,
   Avatars,
   Databases,
+  Query,
   Storage,
 } from "react-native-appwrite";
+import { User } from "./types";
 
 export const config = {
   endpoint: "https://cloud.appwrite.io/v1",
@@ -49,7 +51,7 @@ export const createUser = async ({
     if (!newAccount) throw Error;
 
     const avatarUrl = avatars.getInitials(username);
-    await signIn(email, password);
+    await signIn({ email, password });
 
     const newUser = await databases.createDocument(
       config.databaseId,
@@ -69,7 +71,13 @@ export const createUser = async ({
   }
 };
 
-export async function signIn(email: string, password: string) {
+export async function signIn({
+  email,
+  password,
+}: {
+  email: string;
+  password: string;
+}) {
   try {
     const session = await account.createEmailPasswordSession(email, password);
     return session;
@@ -77,3 +85,47 @@ export async function signIn(email: string, password: string) {
     throw new Error(error);
   }
 }
+
+export const getCurrentUser = async () => {
+  try {
+    const currentAccount = await account.get();
+    if (!currentAccount) throw Error;
+
+    const currentUser = await databases.listDocuments(
+      config.databaseId,
+      config.userCollectionId,
+      [Query.equal("accountId", currentAccount.$id)]
+    );
+
+    if (!currentUser) throw Error;
+    return currentUser.documents[0];
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};
+
+export const getAllPosts = async () => {
+  try {
+    const posts = await databases.listDocuments(
+      config.databaseId,
+      config.videoCollectionId
+    );
+    return posts.documents;
+  } catch (error: any) {
+    throw new Error(error);
+  }
+};
+
+export const getLatestPosts = async () => {
+  try {
+    const posts = await databases.listDocuments(
+      config.databaseId,
+      config.videoCollectionId,
+      [Query.orderDesc("$createdAt"), Query.limit(7)]
+    );
+    return posts.documents;
+  } catch (error: any) {
+    throw new Error(error);
+  }
+};
